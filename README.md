@@ -1,2 +1,2 @@
-# ADB-S Visual
-Visualization of ADB-S data
+# ADS-B Visual
+Visualization of ADS-B data
