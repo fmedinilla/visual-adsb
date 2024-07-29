@@ -35,7 +35,7 @@ void draw_circle(SDL_Renderer *ren, Point center, int radius);
 void draw_moving_line(SDL_Renderer *ren, Point center, int radius);
 void update_planes(Plane *planes);
 int mouse_inside(Point mouse, Plane plane);
-void get_text(SDL_Renderer *ren, int x, int y, char *text, TTF_Font *font, SDL_Texture **texture, SDL_Rect *rect);
+void create_text(SDL_Renderer *ren, int x, int y, char *text, TTF_Font *font, SDL_Texture **texture, SDL_Rect *rect);
 
 int main()
 {
@@ -84,41 +84,38 @@ int main()
 
         viewer_clear(viewer);
 
+        /* ------------------------------------------------------------------------------------- RENDER SECTION */
         // Circulo
         draw_circle(viewer->ren, center, radius);
 
         // Linea
         draw_moving_line(viewer->ren, center, radius);
 
+        // id del avion
+        Point mouse;
+        SDL_GetMouseState(&mouse.x, &mouse.y);
+
         // Aviones
         for (int i = 0; i < MAX_PLANES; i++) {
             SDL_Rect plane_coords = { planes[i].x, planes[i].y, PLANE_SIZE, PLANE_SIZE };
             SDL_RenderCopyEx(viewer->ren, plane_tex, NULL, &plane_coords, planes[i].dir, NULL, SDL_FLIP_NONE);
-        }
 
-        // id del avion
-        Point mouse;
-        SDL_GetMouseState(&mouse.x, &mouse.y);
-        // printf("mouse: (%d, %d)\n", mouse.x, mouse.y);
-
-        for (int i = 0; i < MAX_PLANES; i++) {
             if (mouse_inside(mouse, planes[i])) {
-                // printf("%s\n", planes[i].id);
-
                 SDL_Texture *text;
                 SDL_Rect rect;
-                get_text(viewer->ren, planes[i].x, planes[i].y+PLANE_SIZE, planes[i].id, font, &text, &rect);
+                create_text(viewer->ren, planes[i].x, planes[i].y+PLANE_SIZE, planes[i].id, font, &text, &rect);
                 SDL_RenderCopy(viewer->ren, text, NULL, &rect);
+                SDL_DestroyTexture(text);
             }
         }
+        /* ---------------------------------------------------------------------------------------------------- */
+
 
         // Mostrar lo que se ha dibujado
         viewer_render(viewer);
 
         // update
         update_planes(planes);
-
-        
 
         // 60 FPS
         SDL_Delay(16);
@@ -207,9 +204,6 @@ void draw_moving_line(SDL_Renderer *ren, Point center, int radius)
 
 void update_planes(Plane *planes)
 {
-    // read ADS-B
-    // update planes
-
     double theta_radians = 0;
     double theta_degrees = 0;
 
@@ -241,7 +235,7 @@ int mouse_inside(Point mouse, Plane plane)
     return inside;
 }
 
-void get_text(SDL_Renderer *ren, int x, int y, char *text, TTF_Font *font, SDL_Texture **texture, SDL_Rect *rect)
+void create_text(SDL_Renderer *ren, int x, int y, char *text, TTF_Font *font, SDL_Texture **texture, SDL_Rect *rect)
 {
     int text_w, text_h;
     SDL_Surface *surface;
