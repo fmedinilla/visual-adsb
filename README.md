@@ -10,6 +10,7 @@ Rad [NM]
 
 ## Related to
 - [HTTP API for ADS-B data](https://api.adsb.lol/)
+- [ADS-B message format](https://mode-s.org/decode/content/ads-b/1-basics.html)
 
 ## LICENSE
 [MIT](https://choosealicense.com/licenses/mit/)
