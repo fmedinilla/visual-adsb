@@ -13,6 +13,8 @@
 #include <stdio.h>
 #include <math.h>
 #include <time.h>
+#include <string.h>
+#include <errno.h>
 
 #include "viewer.h"
 #include "plane.h"
