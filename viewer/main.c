@@ -39,12 +39,12 @@ int mouse_inside(Point mouse, Plane plane);
 void create_text(SDL_Renderer *ren, int x, int y, char *text, TTF_Font *font, SDL_Texture **texture, SDL_Rect *rect);
 
 #ifdef WIN32
-#define MAIN int WinMain(int argc, char **argv)
+#define MAIN WinMain
 #else
-#define MAIN int main(int argc, char **argv)
+#define MAIN main
 #endif
 
-MAIN {
+int MAIN(int argc, char *argv[]) {
     Viewer *viewer = viewer_create(WIDTH, HEIGTH);
     viewer_set_background(viewer, 20, 20, 20, 255);
 
