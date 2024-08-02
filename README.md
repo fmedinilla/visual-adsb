@@ -1,19 +1,21 @@
 # ADS-B Visual
 Visualization of ADS-B data
 
-## Notes
-Lat [degrees]  
-Lon [degrees]  
-Rad [NM]
+## Package Installation
+### Arch Linux
+```bash
+sudo pacman -S libsdl2-dev libsdl2-image-dev libsdl2-ttf-dev
+```
 
-1 NM = 1852 m = 0º 1'
+### Debian
+```bash
+sudo apt-get install libsdl2-dev libsdl2-image-dev libsdl2-ttf-dev
+```
 
 ## Related to
 - [HTTP API for ADS-B data](https://api.adsb.lol/)
 - [ADS-B message format](https://mode-s.org/decode/content/ads-b/1-basics.html)
+- [Nautical Mile](https://en.wikipedia.org/wiki/Nautical_mile)
 
 ## LICENSE
 [MIT](https://choosealicense.com/licenses/mit/)
-
-## Package Installation
-``` sudo apt-get install libsdl2-dev libsdl2-image-dev libsdl2-ttf-dev```
