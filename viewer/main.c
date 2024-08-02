@@ -14,7 +14,6 @@
 #include <math.h>
 #include <time.h>
 #include <string.h>
-#include <errno.h>
 
 #include "viewer.h"
 #include "plane.h"
@@ -39,7 +38,7 @@ void update_planes(Plane *planes);
 int mouse_inside(Point mouse, Plane plane);
 void create_text(SDL_Renderer *ren, int x, int y, char *text, TTF_Font *font, SDL_Texture **texture, SDL_Rect *rect);
 
-int main()
+int main(int argc, char **argv)
 {
     Viewer *viewer = viewer_create(WIDTH, HEIGTH);
     viewer_set_background(viewer, 20, 20, 20, 255);
