@@ -18,8 +18,8 @@
 #include "viewer.h"
 #include "plane.h"
 
-#define WIDTH 1080
-#define HEIGTH 1080
+#define WIDTH 720
+#define HEIGTH 720
 
 #define PLANE_SIZE 32
 #define PLANE_SPEED 0.05
