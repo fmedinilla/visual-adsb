@@ -38,8 +38,13 @@ void update_planes(Plane *planes);
 int mouse_inside(Point mouse, Plane plane);
 void create_text(SDL_Renderer *ren, int x, int y, char *text, TTF_Font *font, SDL_Texture **texture, SDL_Rect *rect);
 
-int main(int argc, char **argv)
-{
+#ifdef WIN32
+#define MAIN int WinMain(int argc, char **argv)
+#else
+#define MAIN int main(int argc, char **argv)
+#endif
+
+MAIN {
     Viewer *viewer = viewer_create(WIDTH, HEIGTH);
     viewer_set_background(viewer, 20, 20, 20, 255);
 
@@ -57,23 +62,23 @@ int main(int argc, char **argv)
     // Textura avion
     SDL_Texture *plane_tex = create_texture("plane.png", viewer->ren, viewer->win);
     
-    int radius = 500;
+    int radius = 350;
     Point center = { WIDTH / 2, HEIGTH / 2 };
 
     const int MAX_PLANES = 3;
     Plane planes[MAX_PLANES];
 
     strcpy(planes[0].id, "A00000");
-    planes[0].x = WIDTH - 800;
+    planes[0].x = WIDTH - 150;
     planes[0].y = 150;
 
     strcpy(planes[1].id, "A00010");
-    planes[1].x = 600;
+    planes[1].x = 100;
     planes[1].y = 300;
 
     strcpy(planes[2].id, "A00020");
-    planes[2].x = WIDTH-700;
-    planes[2].y = HEIGTH-200;
+    planes[2].x = WIDTH-300;
+    planes[2].y = HEIGTH-50;
 
     SDL_Event event;
 
