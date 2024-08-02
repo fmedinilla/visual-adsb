@@ -1,6 +1,7 @@
 #include <SDL2/SDL_pixels.h>
 #include <SDL2/SDL_render.h>
 #include <stdlib.h>
+#include <errno.h>
 #include "viewer.h"
 
 Viewer *viewer_create(int width, int heigth)
