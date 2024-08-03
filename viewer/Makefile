@@ -1,14 +1,16 @@
+NAME=viewer
+
 all: build run
 
 
 build:
-	@gcc -o viewer main.c viewer.c -lm -lSDL2 -lSDL2_image -lSDL2_ttf
+	@gcc -o $NAME main.c viewer.c -lm -lSDL2 -lSDL2_image -lSDL2_ttf
 
 
 
 clean:
-	@rm ./viewer
+	@rm ./$NAME
 
 
 run:
-	@./viewer
+	@./$NAME
