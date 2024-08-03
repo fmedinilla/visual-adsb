@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <string.h>
+#include <stdlib.h>
 
 /*
 ADS-B Short message 56 bits (7 bytes)
@@ -37,13 +38,17 @@ Long message
 
 unsigned int get_block(unsigned char *source, int start, int bits);
 void bytes_to_binary_string(unsigned char *bytes, int length, char *output);
+void hexstr_to_bytes(char *hexstr, unsigned char *bytes);
 
 
 int main(int argc, char *argv[])
 {
-    unsigned char message[LONG_MESSAGE_BYTES] = { 0x88, 0xAB, 0xC1, 0x23, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 };
-    char bin_message[LONG_MESSAGE_BITS] = { 0 };
+    char *hexstr = "88ABC12300000000000000000000";
 
+    unsigned char message[LONG_MESSAGE_BYTES] = {0};
+    hexstr_to_bytes(hexstr, message);
+
+    char bin_message[LONG_MESSAGE_BITS] = { 0 };
     bytes_to_binary_string(message, LONG_MESSAGE_BYTES, bin_message);
 
     printf("BIN: ");
@@ -92,4 +97,12 @@ void bytes_to_binary_string(unsigned char *bytes, int length, char *output)
         }
     }
     output[length * 8] = '\0'; // Null-terminator for the string
+}
+
+void hexstr_to_bytes(char *hexstr, unsigned char *bytes)
+{
+    const int LEN = strlen(hexstr) / 2;
+    for (int i = 0; i < LEN; i++) {
+        sscanf(hexstr + 2 * i, "%2hhx", &bytes[i]);
+    }
 }
