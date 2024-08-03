@@ -35,16 +35,16 @@ Long message
 #define LONG_MESSAGE_BYTES 14
 #define LONG_MESSAGE_BITS 14 * 8
 
-void hex_to_bin(char hex, char *bin);
 unsigned int get_block(unsigned char *source, int start, int bits);
-void get_bin(unsigned char *message, char *bin_message);
+void bytes_to_binary_string(unsigned char *bytes, int length, char *output);
+
 
 int main(int argc, char *argv[])
 {
     unsigned char message[LONG_MESSAGE_BYTES] = { 0x88, 0xAB, 0xC1, 0x23, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 };
     char bin_message[LONG_MESSAGE_BITS] = { 0 };
 
-    get_bin(message, bin_message);
+    bytes_to_binary_string(message, LONG_MESSAGE_BYTES, bin_message);
 
     printf("BIN: ");
     for (int i = 0; i < LONG_MESSAGE_BITS; i++) {
@@ -71,68 +71,6 @@ int main(int argc, char *argv[])
     return 0;
 }
 
-void hex_to_bin(char hex, char *bin)
-{
-    switch (hex)
-    {
-    case '0':
-        strcpy(bin, "0000");
-        break;
-    case '1':
-        strcpy(bin, "0001");
-        break;
-    case '2':
-        strcpy(bin, "0010");
-        break;
-    case '3':
-        strcpy(bin, "0011");
-        break;
-    case '4':
-        strcpy(bin, "0100");
-        break;
-    case '5':
-        strcpy(bin, "0101");
-        break;
-    case '6':
-        strcpy(bin, "0110");
-        break;
-    case '7':
-        strcpy(bin, "0111");
-        break;
-    case '8':
-        strcpy(bin, "1000");
-        break;
-    case '9':
-        strcpy(bin, "1001");
-        break;
-    case 'a':
-    case 'A':
-        strcpy(bin, "1010");
-        break;
-    case 'b':
-    case 'B':
-        strcpy(bin, "1011");
-        break;
-    case 'c':
-    case 'C':
-        strcpy(bin, "1100");
-        break;
-    case 'd':
-    case 'D':
-        strcpy(bin, "1101");
-        break;
-    case 'e':
-    case 'E':
-        strcpy(bin, "1110");
-        break;
-    case 'f':
-    case 'F':
-        strcpy(bin, "1111");
-        break;
-    default:
-        strcpy(bin, "0000");
-    }
-}
 
 unsigned int get_block(unsigned char* source, int start, int bits)
 {
@@ -146,31 +84,12 @@ unsigned int get_block(unsigned char* source, int start, int bits)
     return block;
 }
 
-void get_bin(unsigned char *message, char *bin_message)
+void bytes_to_binary_string(unsigned char *bytes, int length, char *output)
 {
-    char bin_1[5] = { 0 };
-    char bin_2[5] = { 0 };
-
-    int idx = 0;
-
-    for (int i = 0; i < LONG_MESSAGE_BYTES; i++) {
-        unsigned char byte = message[i];
-
-        unsigned char top_nibble = (byte >> 4) & 0x0F;
-        unsigned char bottom_nibble = byte & 0x0F;
-
-        // Convertir cada nibble a su representación en caracteres '0'-'9' o 'A'-'F'
-        char top_char = top_nibble < 10 ? '0' + top_nibble : 'A' + (top_nibble - 10);
-        char bottom_char = bottom_nibble < 10 ? '0' + bottom_nibble : 'A' + (bottom_nibble - 10);
-
-        hex_to_bin(top_char, bin_1);
-        hex_to_bin(bottom_char, bin_2);
-
-        for (int i = 0; i < 4; i++) {
-            bin_message[idx + i] = bin_1[i];
-            bin_message[idx + i + 4] = bin_2[i];
+    for (int i = 0; i < length; i++) {
+        for (int j = 7; j >= 0; j--) {
+            output[i * 8 + (7 - j)] = (bytes[i] & (1 << j)) ? '1' : '0';
         }
-
-        idx += 8;
     }
+    output[length * 8] = '\0'; // Null-terminator for the string
 }
