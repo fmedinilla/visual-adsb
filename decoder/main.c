@@ -72,6 +72,9 @@ int main(int argc, char *argv[])
 
     switch (TC)
     {
+        case 0:
+            // None
+            break;
         case 1:
         case 2:
         case 3:
@@ -87,9 +90,52 @@ int main(int argc, char *argv[])
                 start += step;
             }
             break;
+        case 5:
+        case 6:
+        case 7:
+        case 8:
+            // Surface position
+            break;
+        case 9:
+        case 10:
+        case 11:
+        case 12:
+        case 13:
+        case 14:
+        case 15:
+        case 16:
+        case 17:
+        case 18:
+            // Airborne position (w/Baro Altitude)
+            break;
+        case 19:
+            // Airborne velocities
+            break;
+        case 20:
+        case 21:
+        case 22:
+            // Airborne position (w/GNSS Height)
+            break;
+        case 23:
+        case 24:
+        case 25:
+        case 26:
+        case 27:
+            // 	Reserved
+            break;
+        case 28:
+            // 	Aircraft status
+            break;
+        case 29:
+            // 	Target state and status information
+            break;
+        case 30:
+            // None
+            break;
+        case 31:
+            // Aircraft operation status
+            break;
     }
-
-   
 
     unsigned long PARITY = get_block(bin_message, 88, 24);
     printf("PARITY: 0x%X\n", PARITY);
