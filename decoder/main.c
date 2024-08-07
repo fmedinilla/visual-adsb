@@ -22,7 +22,7 @@ typedef struct Aircraft {
     int CA;
     char callsign[9];
 
-    int altitude;
+    int baro_altitude;
 
     double latitude;
     int lat_cpr_even;
@@ -87,7 +87,7 @@ int main()
             a.CA = -1;
             strcpy(a.callsign, "");
             a.next = alist.HEAD;
-            a.altitude = -1;
+            a.baro_altitude = -1;
             a.lat_cpr_even = -1;
             a.lat_cpr_odd = -1;
             a.latitude = -1;
@@ -106,7 +106,8 @@ int main()
 
         // Airborne position (w/Baro Altitude)
         if (frame.TC >= 9 && frame.TC <= 18) {
-            aux->altitude = get_aircraft_baro_alt(frame.ME);
+            aux->baro_altitude = get_aircraft_baro_alt(frame.ME);
+
             get_lat_cpr(frame.ME, aux);
             decode_lat(aux);
         }
@@ -183,7 +184,7 @@ void print_aircraft(Aircraft *aircraft)
     printf("  ICAO: 0x%X\n", aircraft->ICAO);
     printf("  CA: %d\n", aircraft->CA);
     printf("  callsign: '%s'\n", aircraft->callsign);
-    printf("  altitude: %d ft\n", aircraft->altitude);
+    printf("  Barometric altitude: %d ft\n", aircraft->baro_altitude);
     printf("  Lat: %f\n", aircraft->latitude);
 }
 
