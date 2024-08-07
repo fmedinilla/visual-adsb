@@ -1,6 +1,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+
+#define _USE_MATH_DEFINES
 #include <math.h>
 
 /* CONSTANTS */
@@ -32,6 +34,10 @@ typedef struct Aircraft {
     int lat_cpr_even;
     int lat_cpr_odd;
 
+    double longitude;
+    int lon_cpr_even;
+    int lon_cpr_odd;
+
     struct Aircraft *next;
 } Aircraft;
 
@@ -47,6 +53,7 @@ void get_bytes(char *message, byte *bytes);
 void create_adsb_frame(byte *bytes, ADSB_Frame *frame);
 void print_adsb_frame(ADSB_Frame *frame);
 void print_aircraft(Aircraft *aircraft);
+int max(int a, int b);
 
 int get_aircraft_CA(ull ME);
 void get_aircraft_callsign(ull ME, char *callsign);
@@ -54,6 +61,9 @@ int get_aircraft_baro_alt(ull ME);
 int get_cpr_format(ull ME);
 void get_lat_cpr(ull ME, Aircraft *aircraft);
 void decode_lat(Aircraft *aircraft);
+void get_lon_cpr(ull ME, Aircraft *aircraft);
+void decode_lon(Aircraft *aircraft);
+int NL(double latitude);
 /* ------------------------- */
 
 
@@ -95,6 +105,7 @@ int main()
             a.lat_cpr_even = EMPTY_INT_FIELD;
             a.lat_cpr_odd = EMPTY_INT_FIELD;
             a.latitude = EMPTY_INT_FIELD;
+            a.longitude = EMPTY_INT_FIELD;
             
             alist.HEAD = &a;
             alist.size++;
@@ -114,6 +125,9 @@ int main()
 
             get_lat_cpr(frame.ME, aux);
             decode_lat(aux);
+
+            get_lon_cpr(frame.ME, aux);
+            decode_lon(aux);
         }
 
         print_aircraft(aux);
@@ -190,6 +204,12 @@ void print_aircraft(Aircraft *aircraft)
     printf("  callsign: '%s'\n", aircraft->callsign);
     printf("  Barometric altitude: %d ft\n", aircraft->baro_altitude);
     printf("  Lat: %f\n", aircraft->latitude);
+    printf("  Lon: %f\n", aircraft->longitude);
+}
+int max(int a, int b)
+{
+    if (a >= b) return a;
+    return b;
 }
 
 int get_aircraft_CA(ull ME)
@@ -270,5 +290,47 @@ void decode_lat(Aircraft *aircraft)
 
     // TODO: more recent of these two latitudes
     aircraft->latitude = (lat_even + lat_odd) / 2;
+}
+void get_lon_cpr(ull ME, Aircraft *aircraft)
+{
+    // 56 bits
+    // | TC, 5 | SS, 2 | SAF, 1 | ALT, 12 | T, 1 | F, 1 | LAT-CPR, 17 | LON-CPR, 17 |
+
+    int LON_CPR = ME & 0x1FFFF;
+
+    int is_odd = get_cpr_format(ME);
+
+    if (is_odd) aircraft->lon_cpr_odd = LON_CPR;
+    else aircraft->lon_cpr_even = LON_CPR;
+}
+void decode_lon(Aircraft *aircraft)
+{
+    if (aircraft->latitude == EMPTY_INT_FIELD) return;
+    if (aircraft->lon_cpr_even == EMPTY_INT_FIELD || aircraft->lon_cpr_odd == EMPTY_INT_FIELD) return;
+
+    int cprNL = NL(aircraft->latitude);
+
+    double lon_cpr_even = (double) aircraft->lon_cpr_even / (1 << 17);
+    double lon_cpr_odd = (double) aircraft->lon_cpr_odd / (1 << 17);
+
+    int m = floor(lon_cpr_even*(cprNL - 1) - lon_cpr_odd*cprNL + 0.5);
+
+    int n_even = max(cprNL, 1);
+    int n_odd = max(NL(aircraft->latitude) - 1, 1);
+
+    double dLon_even = (double) 360 / n_even;
+    double dLon_odd = (double) 360 / n_odd;
+
+    double lon_even = dLon_even * ((m % n_even) + lon_cpr_even);
+    double lon_odd = dLon_odd * ((m % n_odd) + lon_cpr_odd);
+
+    // TODO: more recent of these two longitudes
+    aircraft->longitude = (lon_even + lon_odd) / 2;
+}
+int NL(double latitude)
+{
+    if (latitude == 0) return 59;
+    else if (latitude == -87 || latitude == 87) return 2;
+    else return floor((2*M_PI) / (acos(1 - ((1-cos(M_PI/30)) / (pow(cos(M_PI*latitude/180), 2))))));
 }
 /* ------------------------- */
