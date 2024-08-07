@@ -3,6 +3,10 @@
 #include <string.h>
 #include <math.h>
 
+/* CONSTANTS */
+#define EMPTY_INT_FIELD -123456
+/* ------------------------- */
+
 
 /* USER TYPES */
 typedef unsigned char byte;
@@ -84,13 +88,13 @@ int main()
         if (!aux) {
             Aircraft a;
             a.ICAO = frame.ICAO;
-            a.CA = -1;
+            a.CA = EMPTY_INT_FIELD;
             strcpy(a.callsign, "");
             a.next = alist.HEAD;
-            a.baro_altitude = -1;
-            a.lat_cpr_even = -1;
-            a.lat_cpr_odd = -1;
-            a.latitude = -1;
+            a.baro_altitude = EMPTY_INT_FIELD;
+            a.lat_cpr_even = EMPTY_INT_FIELD;
+            a.lat_cpr_odd = EMPTY_INT_FIELD;
+            a.latitude = EMPTY_INT_FIELD;
             
             alist.HEAD = &a;
             alist.size++;
@@ -248,7 +252,7 @@ void get_lat_cpr(ull ME, Aircraft *aircraft)
 }
 void decode_lat(Aircraft *aircraft)
 {
-    if (aircraft->lat_cpr_even == -1 || aircraft->lat_cpr_odd == -1) return;
+    if (aircraft->lat_cpr_even == EMPTY_INT_FIELD || aircraft->lat_cpr_odd == EMPTY_INT_FIELD) return;
 
     double dLat_even = (double) 360 / 60;
     double dLat_odd = (double) 360 / 59;
