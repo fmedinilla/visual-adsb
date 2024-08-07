@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <math.h>
 
 
 /* USER TYPES */
@@ -20,6 +21,13 @@ typedef struct Aircraft {
     int ICAO;
     int CA;
     char callsign[9];
+
+    int altitude;
+
+    double latitude;
+    int lat_cpr_even;
+    int lat_cpr_odd;
+
     struct Aircraft *next;
 } Aircraft;
 
@@ -38,6 +46,10 @@ void print_aircraft(Aircraft *aircraft);
 
 int get_aircraft_CA(ull ME);
 void get_aircraft_callsign(ull ME, char *callsign);
+int get_aircraft_baro_alt(ull ME);
+int get_cpr_format(ull ME);
+void get_lat_cpr(ull ME, Aircraft *aircraft);
+void decode_lat(Aircraft *aircraft);
 /* ------------------------- */
 
 
@@ -75,6 +87,10 @@ int main()
             a.CA = -1;
             strcpy(a.callsign, "");
             a.next = alist.HEAD;
+            a.altitude = -1;
+            a.lat_cpr_even = -1;
+            a.lat_cpr_odd = -1;
+            a.latitude = -1;
             
             alist.HEAD = &a;
             alist.size++;
@@ -86,6 +102,13 @@ int main()
         if (frame.TC >= 1 && frame.TC <= 4) {
             aux->CA = get_aircraft_CA(frame.ME);
             get_aircraft_callsign(frame.ME, aux->callsign);
+        }
+
+        // Airborne position (w/Baro Altitude)
+        if (frame.TC >= 9 && frame.TC <= 18) {
+            aux->altitude = get_aircraft_baro_alt(frame.ME);
+            get_lat_cpr(frame.ME, aux);
+            decode_lat(aux);
         }
 
         print_aircraft(aux);
@@ -160,6 +183,8 @@ void print_aircraft(Aircraft *aircraft)
     printf("  ICAO: 0x%X\n", aircraft->ICAO);
     printf("  CA: %d\n", aircraft->CA);
     printf("  callsign: '%s'\n", aircraft->callsign);
+    printf("  altitude: %d ft\n", aircraft->altitude);
+    printf("  Lat: %f\n", aircraft->latitude);
 }
 
 int get_aircraft_CA(ull ME)
@@ -184,5 +209,61 @@ void get_aircraft_callsign(ull ME, char *callsign)
         start -= 6;
     }
     callsign[8] = '\0';
+}
+int get_aircraft_baro_alt(ull ME)
+{
+    // 56 bits
+    // | TC, 5 | SS, 2 | SAF, 1 | ALT, 12 | T, 1 | F, 1 | LAT-CPR, 17 | LON-CPR, 17 |
+
+    int ALT = (ME & ((ull)0b111111111111 << 36)) >> 36;
+    
+    // 1: 25ft, 0: 100ft (gray code)
+    int q_bit = (ALT & (0b1 << 4)) >> 4; 
+    int alt_left = (ALT &  (0b1111111 << 5)) >> 5;
+    int alt_right = ALT & 0b1111;
+    int alt = (alt_left << 4) | alt_right;
+    int altitude = alt * 25 - 1000;
+    return altitude;
+}
+int get_cpr_format(ull ME)
+{
+    // 56 bits
+    // | TC, 5 | SS, 2 | SAF, 1 | ALT, 12 | T, 1 | F, 1 | LAT-CPR, 17 | LON-CPR, 17 |
+
+    int CPR_F = (ME & ((ull)0b1 << 34)) >> 34;
+    return CPR_F;
+}
+void get_lat_cpr(ull ME, Aircraft *aircraft)
+{
+    // 56 bits
+    // | TC, 5 | SS, 2 | SAF, 1 | ALT, 12 | T, 1 | F, 1 | LAT-CPR, 17 | LON-CPR, 17 |
+
+    int LAT_CPR = (ME & ((ull)0x1FFFF << 17)) >> 17;
+
+    int is_odd = get_cpr_format(ME);
+
+    if (is_odd) aircraft->lat_cpr_odd = LAT_CPR;
+    else aircraft->lat_cpr_even = LAT_CPR;
+}
+void decode_lat(Aircraft *aircraft)
+{
+    if (aircraft->lat_cpr_even == -1 || aircraft->lat_cpr_odd == -1) return;
+
+    double dLat_even = (double) 360 / 60;
+    double dLat_odd = (double) 360 / 59;
+
+    double lat_cpr_even = (double) aircraft->lat_cpr_even / (1 << 17);
+    double lat_cpr_odd = (double) aircraft->lat_cpr_odd / (1 << 17);
+
+    int j = floor(59 * lat_cpr_even - 60 * lat_cpr_odd + 0.5);
+
+    double lat_even = dLat_even * ((j % 60) + lat_cpr_even);
+    double lat_odd = dLat_odd * ((j % 59) + lat_cpr_odd);
+
+    if (lat_even >= 270) lat_even -= 360;
+    if (lat_odd >= 270) lat_odd -= 360;
+
+    // where the current latitude is the more recent of these two latitudes.
+    aircraft->latitude = (lat_even + lat_odd) / 2;
 }
 /* ------------------------- */
