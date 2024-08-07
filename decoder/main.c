@@ -263,7 +263,7 @@ void decode_lat(Aircraft *aircraft)
     if (lat_even >= 270) lat_even -= 360;
     if (lat_odd >= 270) lat_odd -= 360;
 
-    // where the current latitude is the more recent of these two latitudes.
+    // TODO: more recent of these two latitudes
     aircraft->latitude = (lat_even + lat_odd) / 2;
 }
 /* ------------------------- */
