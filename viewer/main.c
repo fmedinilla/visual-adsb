@@ -97,11 +97,10 @@ int MAIN(int argc, char *argv[]) {
         // Linea
         draw_moving_line(viewer->ren, center, radius);
 
-        // id del avion
+        // Id del avion
         Point mouse;
         SDL_GetMouseState(&mouse.x, &mouse.y);
 
-        // Aviones
         for (int i = 0; i < MAX_PLANES; i++) {
             SDL_Rect plane_coords = { planes[i].x, planes[i].y, PLANE_SIZE, PLANE_SIZE };
             SDL_RenderCopyEx(viewer->ren, plane_tex, NULL, &plane_coords, planes[i].dir, NULL, SDL_FLIP_NONE);
