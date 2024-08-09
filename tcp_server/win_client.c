@@ -5,57 +5,89 @@
 #define PORT 8080
 
 
-int main() {
+typedef struct {
+    char ip[17];
+    int port;
+
     WSADATA wsaData;
     SOCKET clientSocket;
     struct sockaddr_in serverAddr;
-    char *message;
+} TCP_Client;
+
+
+void client_init(TCP_Client *client, char *ip, int port);
+void client_connect(TCP_Client *client);
+void client_send(TCP_Client *client, char *message, int size);
+void client_close(TCP_Client *client);
+
+int main()
+{
+    TCP_Client client;    
+
+    client_init(&client, "192.168.1.120", PORT);
+
+    client_connect(&client);
+
+    char *message = "Hola desde el cliente";
+    client_send(&client, message, strlen(message));
+    printf("Mensaje enviado: %s\n", message);
+
+    client_close(&client);
+
+    return 0;
+}
+
+void client_init(TCP_Client *client, char *ip, int port)
+{
+    client->port = port;
+    strcpy(client->ip, ip);
 
     // Inicializar Winsock
-    if (WSAStartup(MAKEWORD(2, 2), &wsaData) != 0) {
+    if (WSAStartup(MAKEWORD(2, 2), &client->wsaData) != 0) {
         printf("Falló la inicialización de Winsock. Error: %d\n", WSAGetLastError());
-        return 1;
+        exit(EXIT_FAILURE);
     }
 
     // Crear un socket
-    clientSocket = socket(AF_INET, SOCK_STREAM, 0);
-    if (clientSocket == INVALID_SOCKET) {
+    client->clientSocket = socket(AF_INET, SOCK_STREAM, 0);
+    if (client->clientSocket == INVALID_SOCKET) {
         printf("No se pudo crear el socket. Error: %d\n", WSAGetLastError());
         WSACleanup();
-        return 1;
+        exit(EXIT_FAILURE);
     }
 
     // Configurar la estructura sockaddr_in para conectar al servidor
-    serverAddr.sin_family = AF_INET;
-    serverAddr.sin_addr.s_addr = inet_addr("192.168.1.120");    // Dirección IP del servidor
-    serverAddr.sin_port = htons(PORT);                          // Puerto del servidor
-
+    client->serverAddr.sin_family = AF_INET;
+    client->serverAddr.sin_addr.s_addr = inet_addr(client->ip); // Dirección IP del servidor
+    client->serverAddr.sin_port = htons(client->port);          // Puerto del servidor
+}
+void client_connect(TCP_Client *client)
+{
     // Conectar al servidor
-    if (connect(clientSocket, (struct sockaddr *)&serverAddr, sizeof(serverAddr)) < 0) {
+    if (connect(client->clientSocket, (struct sockaddr *)&client->serverAddr, sizeof(client->serverAddr)) < 0) {
         printf("Error al conectar con el servidor. Error: %d\n", WSAGetLastError());
-        closesocket(clientSocket);
+        closesocket(client->clientSocket);
         WSACleanup();
-        return 1;
+        exit(EXIT_FAILURE);
     }
 
     printf("Conectado al servidor.\n");
-
+}
+void client_send(TCP_Client *client, char *message, int size)
+{
     // Enviar un mensaje al servidor
-    message = "Hola desde el cliente";
-    if (send(clientSocket, message, strlen(message), 0) < 0) {
+    if (send(client->clientSocket, message, size, 0) < 0) {
         printf("Error al enviar datos. Error: %d\n", WSAGetLastError());
-        closesocket(clientSocket);
+        closesocket(client->clientSocket);
         WSACleanup();
-        return 1;
+        exit(EXIT_FAILURE);
     }
-
-    printf("Mensaje enviado: %s\n", message);
-
-    // Cerrar el socket
-    closesocket(clientSocket);
+}
+void client_close(TCP_Client *client)
+{
+     // Cerrar el socket
+    closesocket(client->clientSocket);
 
     // Finalizar el uso de Winsock
     WSACleanup();
-
-    return 0;
 }
