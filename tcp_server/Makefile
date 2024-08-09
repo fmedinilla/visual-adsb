@@ -13,4 +13,4 @@ win_server:
 
 
 win_client:
-	@gcc -o $(CLIENT_APP) win_client.c -lm -lws2_32
+	@gcc -o $(CLIENT_APP) win_client.c tcp_client.c -lm -lws2_32
