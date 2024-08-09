@@ -5,8 +5,12 @@ CLIENT_APP=tcp_client
 all: windows
 
 
-windows: win_server
+windows: win_server win_client
 
 
 win_server:
 	@gcc -o $(SERVER_APP) win_server.c -lm -lws2_32
+
+
+win_client:
+	@gcc -o $(CLIENT_APP) win_client.c -lm -lws2_32
