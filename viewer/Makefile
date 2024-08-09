@@ -5,7 +5,7 @@ all: build run
 
 
 build:
-	@gcc -o $NAME main.c viewer.c -lm -lSDL2 -lSDL2_image -lSDL2_ttf
+	@gcc -o $NAME main.c viewer.c utils.c -lm -lSDL2 -lSDL2_image -lSDL2_ttf
 
 
 
