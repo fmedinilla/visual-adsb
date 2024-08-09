@@ -1,16 +1,12 @@
-NAME=tcp_server
-
-all: build run
-
-
-build:
-	@gcc -o $(NAME) main.c -lm
+SERVER_APP=tcp_server
+CLIENT_APP=tcp_client
 
 
-
-clean:
-	@rm ./$(NAME)
+all: windows
 
 
-run:
-	@./$(NAME)
+windows: win_server
+
+
+win_server:
+	@gcc -o $(SERVER_APP) win_server.c -lm -lws2_32
