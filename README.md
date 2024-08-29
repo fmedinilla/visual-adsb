@@ -1,6 +1,10 @@
 # ADS-B Visual
 Visualization of ADS-B data
 
+## General Sketch
+![](sketch.png)
+
+
 ## Package Installation
 ### Arch Linux
 ```bash
