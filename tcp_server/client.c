@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <string.h>
 #include "tcp_client.h"
 
 
@@ -6,7 +7,7 @@ int main()
 {
     TCP_Client client;    
 
-    client_init(&client, "192.168.1.120", 8080);
+    client_init(&client, "192.168.1.130", 8080);
 
     client_connect(&client);
 
